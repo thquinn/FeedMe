@@ -92,7 +92,7 @@ public class WorldGenScript : MonoBehaviour
             RoomInfo currentInfo = roomInfos[current];
             // Check if the current room has an exit in each direction.
             for (int i = 0; i < 6; i++) {
-                if (currentInfo.exits[i] == ExitType.None) {
+                if (currentInfo.exits[i] != ExitType.Door) {
                     continue;
                 }
                 Tuple<int, int, int> neighborCoor = GetNeighborCoor(current, i);
@@ -192,6 +192,7 @@ public class WorldGenScript : MonoBehaviour
         if (info.rotation > 0) {
             roomObject.transform.localRotation = Quaternion.Euler(0, info.rotation * 90, 0);
         }
+        roomObject.name = info.ToString();
 
         roomInfos.Add(coor, info);
         roomObjects.Add(coor, roomObject);
@@ -200,6 +201,11 @@ public class WorldGenScript : MonoBehaviour
 }
 
 class RoomInfo {
+    static int[][][] TRANSFORM_LOOKUP = new int[][][] {
+        new int[][]{ new int[] { 0, 1, 2, 3, 4, 5 }, new int[] { 3, 0, 1, 2, 4, 5 }, new int[] { 2, 3, 0, 1, 4, 5 }, new int[] { 1, 2, 3, 0, 4, 5 } },
+        new int[][]{ new int[] { 0, 3, 2, 1, 4, 5 }, new int[] { 1, 0, 3, 2, 4, 5 }, new int[] { 2, 1, 0, 3, 4, 5 }, new int[] { 3, 2, 1, 0, 4, 5 } }
+    };
+
     public int prefabIndex;
     public string name;
     public ExitType[] exits;
@@ -226,8 +232,9 @@ class RoomInfo {
         prefabIndex = other.prefabIndex;
         name = other.name;
         exits = new ExitType[6];
+        int[] transform = TRANSFORM_LOOKUP[flipped ? 1 : 0][rotation];
         for (int direction = 0; direction < 6; direction++) {
-            exits[direction] = other.exits[TranslateDirection(direction, flipped, rotation)];
+            exits[direction] = other.exits[transform[direction]];
         }
         randomState = UnityEngine.Random.state;
         this.flipped = flipped;
@@ -235,14 +242,11 @@ class RoomInfo {
     }
 
     public override string ToString() {
-        return string.Format("{0} rotation {1}{2}", name, rotation, flipped ? " (flipped" : "");
+        return string.Format("{0} rotation {1}{2}", name, rotation, flipped ? " (flipped)" : "");
     }
 
     public static int TranslateDirection(int direction, bool flipped, int rotation) {
-        if (direction > 3) {
-            return direction;
-        }
-        return Util.Mod(direction + (flipped ? 1 : -1) * rotation, 4);
+        return TRANSFORM_LOOKUP[flipped ? 1 : 0][rotation][direction];
     }
 }
 
@@ -252,8 +256,8 @@ public enum ExitType : int {
 public static class ExitTypeExtensions {
     static bool[,] COMPATIBILITY_MATRIX = new bool[,] {
         { true,  true,  true,  true },
-        { true,  true,  true,  false },
-        { true,  true,  true,  false },
+        { true,  true,  false, false },
+        { true,  false, true,  false },
         { true,  false, false, true },
     };
 
