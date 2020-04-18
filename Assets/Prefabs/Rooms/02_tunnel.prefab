@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 8723144498953128556}
   - component: {fileID: 8723144498953128557}
   - component: {fileID: 8723144498953128558}
-  m_Layer: 0
+  - component: {fileID: 8121645470344562598}
+  m_Layer: 11
   m_Name: 02_tunnel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -93,3 +94,15 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 14
   m_Mesh: {fileID: 607603000665971326, guid: 208c11c9ea8923c4bbc402c32713e2b5, type: 3}
+--- !u!114 &8121645470344562598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8723144498953128554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63de864c3212e1d42b623c5cf8b807ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

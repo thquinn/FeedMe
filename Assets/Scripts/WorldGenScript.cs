@@ -131,7 +131,7 @@ public class WorldGenScript : MonoBehaviour
                     // Given this configuration of this room type, do its entrances match up with the adjacent exits already present?
                     bool compatible = true;
                     for (int direction = 0; direction < 6; direction++) {
-                        if (!adjacentExits[direction].IsCompatibleWith(roomType.exits[RoomInfo.TranslateDirection(direction, flipped, rotation)])) {
+                        if (!adjacentExits[direction].IsCompatibleWith(roomType.exits[RoomInfo.TranslateDirection(direction, flipped, rotation)], direction)) {
                             compatible = false;
                             break;
                         }
@@ -254,7 +254,13 @@ public enum ExitType : int {
     Undecided, None, Nothingness, Door
 }
 public static class ExitTypeExtensions {
-    static bool[,] COMPATIBILITY_MATRIX = new bool[,] {
+    static bool[,] HORIZONTAL_COMPATIBILITY_MATRIX = new bool[,] {
+        { true,  true,  true,  true },
+        { true,  true,  true, false },
+        { true,  true,  true,  false },
+        { true,  false, false, true },
+    };
+    static bool[,] VERTICAL_COMPATIBILITY_MATRIX = new bool[,] {
         { true,  true,  true,  true },
         { true,  true,  false, false },
         { true,  false, true,  false },
@@ -269,7 +275,7 @@ public static class ExitTypeExtensions {
         }
         return ExitType.None;
     }
-    public static bool IsCompatibleWith(this ExitType one, ExitType two) {
-        return COMPATIBILITY_MATRIX[(int)one, (int)two];
+    public static bool IsCompatibleWith(this ExitType one, ExitType two, int direction) {
+        return direction <= 3 ? HORIZONTAL_COMPATIBILITY_MATRIX[(int)one, (int)two] : VERTICAL_COMPATIBILITY_MATRIX[(int)one, (int)two];
     }
 }

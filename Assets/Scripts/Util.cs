@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts {
     public class Util {
-        static LayerMask layerMaskDefault;
+        static LayerMask layerMaskTerrain;
         static float SHADOW_DISTANCE = 2;
 
         public static float CorrectDegreeDiscrepancy(float oldTheta, float newTheta) {
@@ -22,16 +22,17 @@ namespace Assets.Scripts {
         }
 
         public static void UpdateShadow(GameObject go, SpriteRenderer shadowRenderer) {
-            if (layerMaskDefault == 0) {
-                layerMaskDefault = LayerMask.GetMask("Default");
+            if (layerMaskTerrain == 0) {
+                layerMaskTerrain = LayerMask.GetMask("Terrain");
             }
             RaycastHit hitInfo;
-            Physics.Raycast(go.transform.position, Vector3.down, out hitInfo, SHADOW_DISTANCE, layerMaskDefault);
+            Physics.Raycast(go.transform.position, Vector3.down, out hitInfo, SHADOW_DISTANCE, layerMaskTerrain);
             if (hitInfo.collider) {
                 shadowRenderer.enabled = true;
-                Vector3 position = shadowRenderer.transform.position;
+                Vector3 position = go.transform.position;
                 position.y = hitInfo.point.y + .01f;
                 shadowRenderer.transform.position = position;
+                shadowRenderer.transform.rotation = Quaternion.Euler(90, 0, 0);
                 Color c = shadowRenderer.color;
                 c.a = Mathf.Lerp(.1f, 0, hitInfo.distance / SHADOW_DISTANCE);
                 shadowRenderer.color = c;
