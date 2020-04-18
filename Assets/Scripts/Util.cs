@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -37,6 +38,27 @@ namespace Assets.Scripts {
             } else {
                 shadowRenderer.enabled = false;
             }
+        }
+
+        public static int Mod(int x, int m) {
+            return (x % m + m) % m;
+        }
+
+        public static string[] SplitNewLines(string text) {
+            return text.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        }
+    }
+
+    public static class ArrayExtensions {
+        public static T[] Shuffle<T>(this T[] array) {
+            int n = array.Length;
+            for (int i = 0; i < n; i++) {
+                int r = i + UnityEngine.Random.Range(0, n - i);
+                T t = array[r];
+                array[r] = array[i];
+                array[i] = t;
+            }
+            return array;
         }
     }
 }

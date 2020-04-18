@@ -1,0 +1,4 @@
+name			N	E	S	W	U	D
+01_fourway		D	D	D	D	N	/
+02_tunnel		/	D	/	D	N	/
+03_peninsula	N	N	D	N	N	/
