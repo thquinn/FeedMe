@@ -15,6 +15,7 @@ public class PlayerScript : MonoBehaviour
     static int WHISTLE_READY_NO_GO_COOLDOWN = 300;
     static int WHISTLE_READY_GO_COOLDOWN = 150;
     static int WHISTLE_GO_COOLDOWN = 20;
+    static float Y_COOR_DEAD = -4;
 
     private LayerMask layerMaskTerrain, layerMaskGrabbable;
 
@@ -41,6 +42,9 @@ public class PlayerScript : MonoBehaviour
     void Update() {
         if (!CAN_INPUT) {
             return;
+        }
+        if (transform.localPosition.y < Y_COOR_DEAD) {
+            deathScript.PlayerDie(DeathReason.PlayerFall);
         }
         LookControls(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         MoveControls(Input.GetAxis("Vertical"), Input.GetAxis("Horizontal"));
@@ -140,7 +144,7 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if (other.tag == "Death") {
-            deathScript.Die();
+            deathScript.PlayerDie(DeathReason.PlayerHazard);
         }
     }
 }

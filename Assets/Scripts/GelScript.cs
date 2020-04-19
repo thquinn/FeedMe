@@ -83,11 +83,14 @@ public class GelScript : MonoBehaviour
         }
     }
 
-    void Update()
-    {
+    void Update() {
         hunger += .0167f;
-        if (hunger > HUNGER_DEAD || transform.localPosition.y < Y_COOR_DEAD) {
-            Die();
+        if (hunger > HUNGER_DEAD) {
+            Die(DeathReason.GelStarve);
+            return;
+        }
+        if (transform.localPosition.y < Y_COOR_DEAD) {
+            Die(DeathReason.GelFall);
             return;
         }
         if (hopCooldown > 0) {
@@ -185,8 +188,9 @@ public class GelScript : MonoBehaviour
             speechCanvasGroup.alpha -= .1f;
         }
         // Whistle ready animation.
-        gimbal.transform.localPosition = Vector3.Lerp(gimbal.transform.localPosition, whistleReadyFrames > 0 ? WHISTLE_READY_ANIM_SHIFT : Vector3.zero, .2f);
-        gimbal.transform.localScale = Vector3.Lerp(gimbal.transform.localScale, whistleReadyFrames > 0 ? WHISTLE_READY_ANIM_SCALE : Vector3.one, .2f);
+        bool whistleSquash = whistleReadyFrames > 0 && isOnGround && Time.timeScale > 0;
+        gimbal.transform.localPosition = Vector3.Lerp(gimbal.transform.localPosition, whistleSquash ? WHISTLE_READY_ANIM_SHIFT : Vector3.zero, .2f);
+        gimbal.transform.localScale = Vector3.Lerp(gimbal.transform.localScale, whistleSquash ? WHISTLE_READY_ANIM_SCALE : Vector3.one, .2f);
     }
     void Hop() {
         if (hopCooldown > 0 || !isOnGround) {
@@ -304,12 +308,12 @@ public class GelScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if (other.tag == "Death") {
-            Die();
+            Die(DeathReason.GelHazard);
         }
     }
-    void Die() {
+    void Die(DeathReason deathReason) {
         meshFilter.mesh = deadMesh;
-        deathScript.Die();
+        deathScript.GelDie(deathReason);
     }
 
     public void WhistleReady() {
