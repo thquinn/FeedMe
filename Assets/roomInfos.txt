@@ -7,3 +7,5 @@ name			N	E	S	W	U	D	flippable
 06_tripleblades	D	W	D	N	/	/	N
 07_threeway		D	W	D	D	N	/	Y
 08_wallclimbing	N	O	D	D	N	/	Y
+09_surrounded	D	W	W	W	N	/	Y
+10_meander		D	N	W	D	N	/	Y

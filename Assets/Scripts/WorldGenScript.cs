@@ -44,6 +44,10 @@ public class WorldGenScript : MonoBehaviour
         if (playerCoor.Equals(lastPlayerCoor)) {
             return;
         }
+        if (playerCoor.Item2 != 0) {
+            // TODO: Add verticality.
+            return;
+        }
         lastPlayerCoor = playerCoor;
         bool generated = true;
         while (generated) {
@@ -54,17 +58,19 @@ public class WorldGenScript : MonoBehaviour
         bool generated = false;
         // Find all missing rooms within N that can be reached.
         for (int dx = -n; dx <= n; dx++) {
-            for (int dy = -n; dy <= n; dy++) {
+            // TODO: Add verticality back in.
+            int dy = 0; //for (int dy = -n; dy <= n; dy++) {
                 for (int dz = -n; dz <= n; dz++) {
                     Tuple<int, int, int> coor = new Tuple<int, int, int>(playerCoor.Item1 + dx, playerCoor.Item2 + dy, playerCoor.Item3 + dz);
                     if (roomInfos.ContainsKey(coor)) {
                         // This room has already been generated.
                         continue;
                     }
-                    if (!CanBeReached(playerCoor, coor)) {
+                    // We need to generate everything we can see, not just where we can go.
+                    //if (!CanBeReached(playerCoor, coor)) {
                         // There would be no path to this room.
-                        continue;
-                    }
+                        //continue;
+                    //}
                     RoomInfo compatibleRoomInfo = GetCompatibleRoomInfo(coor);
                     if (compatibleRoomInfo == null) {
                         // We've decided not to put something here, maybe because nothing will fit.
@@ -75,7 +81,7 @@ public class WorldGenScript : MonoBehaviour
                     }
                     generated = true;
                 }
-            }
+            //}
         }
         return generated;
     }
@@ -117,10 +123,12 @@ public class WorldGenScript : MonoBehaviour
             }
             adjacentExits[direction] = roomInfos[neighborCoor].exits[ReverseDirection(direction)];
         }
+        /*
         if (adjacentExits.All(exit => exit == ExitType.Nothingness || exit == ExitType.Undecided) && UnityEngine.Random.value < NOTHINGNESS_VACANCY_CHANCE) {
             // We're only connected to nothingness, so we should usually spawn nothing.
             return null;
         }
+        */
 
         int[] roomTypeOrder = Enumerable.Range(0, roomTypes.Count).ToArray().Shuffle();
         foreach (RoomInfo roomType in roomTypeOrder.Select(i => roomTypes[i])) {

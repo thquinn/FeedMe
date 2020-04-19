@@ -6,26 +6,28 @@ using UnityEngine.UI;
 
 public class GelScript : MonoBehaviour
 {
-    static Vector3 FRICTION_VECTOR = new Vector3(.91f, 1, .91f);
+    static Vector3 FRICTION_VECTOR = new Vector3(.88f, 1, .88f);
     static float PLAYER_CHASE_DISTANCE = 2;
     static float FOOD_CHASE_DISTANCE = 6;
     static float SQR_EATING_DISTANCE = .4f;
-    static float HUNGER_MODERATE = 5;//60;
-    static float HUNGER_SEVERE = 10;//120;
-    static float HUNGER_CRITICAL = 15;//150;
-    static float HUNGER_DEAD = 18;//180;
+    static float HUNGER_MODERATE = 60;
+    static float HUNGER_SEVERE = 120;
+    static float HUNGER_CRITICAL = 150;
+    static float HUNGER_DEAD = 180;
     static float SATIATION_FRUIT = 30;
+    static float EAT_RATE = .033f;
     static float HOP_HEIGHT = .33f;
     static float HOP_FORCE = 3f;
     static int SPEED_BOOST_DURATION = 15 * 60;
     static float SPEED_BOOST_MULTIPLIER = 1.25f;
     static float HAPPY_HOP_FORCE = .5f;
-    static float WHISTLE_HOP_FORCE = 4.5f;
-    static float WHISTLE_HOP_HEIGHT = 1.25f;
+    static float WHISTLE_HOP_FORCE = 3.75f;
+    static float WHISTLE_HOP_HEIGHT = 1.65f;
     static int HOP_COOLDOWN = 15;
     static int WHISTLE_HOP_COOLDOWN = 75;
-    static float EAT_RATE = .033f;
     static int WHISTLE_READY_TICKS = 180;
+    static int WHISTLE_HOP_PUSH_FRAMES = 60;
+    static float WHISTLE_HOP_PUSH_FORCE = .5f;
     static Vector3 WHISTLE_READY_ANIM_SCALE = new Vector3(1, .8f, 1);
     static Vector3 WHISTLE_READY_ANIM_SHIFT = new Vector3(0, -.15f, 0);
     static int STARE_TIME = 90;
@@ -51,7 +53,9 @@ public class GelScript : MonoBehaviour
     float hunger;
     int hopCooldown;
     int speedBoostFrames;
-    int whistleReadyTicks;
+    int whistleReadyFrames;
+    int whistleHopPushFrames;
+
     FruitColor desiredFruit;
     float desireLeft;
     bool firstDesireDone;
@@ -83,9 +87,13 @@ public class GelScript : MonoBehaviour
         if (speedBoostFrames > 0) {
             speedBoostFrames--;
         }
-        if (whistleReadyTicks > 0) {
-            whistleReadyTicks--;
+        if (whistleReadyFrames > 0) {
+            whistleReadyFrames--;
             hopCooldown = 1;
+        }
+        if (whistleHopPushFrames > 0) {
+            rb.AddForce(transform.forward * WHISTLE_HOP_PUSH_FORCE);
+            whistleHopPushFrames--;
         }
         UpdateCachedState();
         UpdateDesire();
@@ -139,7 +147,8 @@ public class GelScript : MonoBehaviour
         // Stare logic.
         float dot = Vector3.Dot(cam.transform.forward, (transform.position - cam.transform.position).normalized);
         stare &= dot > .75f;
-        stare &= whistleReadyTicks == 0;
+        stare &= isOnGround;
+        stare &= whistleReadyFrames == 0;
         stare &= Time.timeScale > 0;
         if (stare) {
             stareTimer++;
@@ -160,8 +169,8 @@ public class GelScript : MonoBehaviour
             speechCanvasGroup.alpha -= .1f;
         }
         // Whistle ready animation.
-        gimbal.transform.localPosition = Vector3.Lerp(gimbal.transform.localPosition, whistleReadyTicks > 0 ? WHISTLE_READY_ANIM_SHIFT : Vector3.zero, .2f);
-        gimbal.transform.localScale = Vector3.Lerp(gimbal.transform.localScale, whistleReadyTicks > 0 ? WHISTLE_READY_ANIM_SCALE : Vector3.one, .2f);
+        gimbal.transform.localPosition = Vector3.Lerp(gimbal.transform.localPosition, whistleReadyFrames > 0 ? WHISTLE_READY_ANIM_SHIFT : Vector3.zero, .2f);
+        gimbal.transform.localScale = Vector3.Lerp(gimbal.transform.localScale, whistleReadyFrames > 0 ? WHISTLE_READY_ANIM_SCALE : Vector3.one, .2f);
     }
     void Hop() {
         if (hopCooldown > 0 || !isOnGround) {
@@ -218,8 +227,8 @@ public class GelScript : MonoBehaviour
 
     void SpeechEffects() {
         speechCanvas.transform.LookAt(cam.transform);
-        bubbleImage.materialForRendering.SetTexture("_MainTex", hunger < HUNGER_SEVERE ? bubbleNormal.texture : bubbleCritical.texture);
-        //bubbleImage.sprite = hunger < HUNGER_SEVERE ? bubbleNormal : bubbleCritical;
+        bubbleImage.sprite = hunger < HUNGER_SEVERE ? bubbleNormal : bubbleCritical;
+        bubbleImage.materialForRendering.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
         exclamationImage.enabled = hunger > HUNGER_CRITICAL;
         float contentShake = Mathf.InverseLerp(HUNGER_MODERATE, HUNGER_SEVERE, hunger) * SPEECH_CONTENTS_SHAKE_AMOUNT;
         Vector3 shakePosition = speechContentsInitialPosition + new Vector3(contentShake * Random.Range(-1f, 1f), contentShake * Random.Range(-1f, 1f), 0);
@@ -261,19 +270,20 @@ public class GelScript : MonoBehaviour
     }
 
     public void WhistleReady() {
-        whistleReadyTicks = WHISTLE_READY_TICKS;
+        whistleReadyFrames = WHISTLE_READY_TICKS;
     }
     public bool IsWhistleReadied() {
-        return whistleReadyTicks > 0;
+        return whistleReadyFrames > 0;
     }
     public void WhistleJump() {
-        whistleReadyTicks = 0;
+        whistleReadyFrames = 0;
         if (!isOnGround) {
             return;
         }
         Vector3 forward = transform.forward;
         forward.y += WHISTLE_HOP_HEIGHT;
         rb.AddForce(forward * WHISTLE_HOP_FORCE, ForceMode.Impulse);
+        whistleHopPushFrames = WHISTLE_HOP_PUSH_FRAMES;
         hopCooldown = WHISTLE_HOP_COOLDOWN;
     }
 }
