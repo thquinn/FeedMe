@@ -63,7 +63,7 @@ public class PlayerScript : MonoBehaviour
             jumpCooldown--;
         } else if (Input.GetButtonDown("Jump") && Util.IsOnGround(gameObject, 16, .4f, .55f)) {
             rb.velocity += Vector3.up * JUMP_FORCE;
-            jumpCooldown = 4;
+            jumpCooldown = 10;
         }
     }
     void GrabControls() {

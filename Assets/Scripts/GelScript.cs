@@ -10,10 +10,10 @@ public class GelScript : MonoBehaviour
     static float PLAYER_CHASE_DISTANCE = 2;
     static float FOOD_CHASE_DISTANCE = 6;
     static float SQR_EATING_DISTANCE = .4f;
-    static float HUNGER_MODERATE = 60;
-    static float HUNGER_SEVERE = 120;
-    static float HUNGER_CRITICAL = 150;
-    static float HUNGER_DEAD = 180;
+    static float HUNGER_MODERATE = 5;//60;
+    static float HUNGER_SEVERE = 10;//120;
+    static float HUNGER_CRITICAL = 15;//150;
+    static float HUNGER_DEAD = 18;//180;
     static float SATIATION_FRUIT = 30;
     static float HOP_HEIGHT = .33f;
     static float HOP_FORCE = 3f;
@@ -218,11 +218,18 @@ public class GelScript : MonoBehaviour
 
     void SpeechEffects() {
         speechCanvas.transform.LookAt(cam.transform);
-        bubbleImage.sprite = hunger < HUNGER_SEVERE ? bubbleNormal : bubbleCritical;
+        bubbleImage.materialForRendering.SetTexture("_MainTex", hunger < HUNGER_SEVERE ? bubbleNormal.texture : bubbleCritical.texture);
+        //bubbleImage.sprite = hunger < HUNGER_SEVERE ? bubbleNormal : bubbleCritical;
         exclamationImage.enabled = hunger > HUNGER_CRITICAL;
         float contentShake = Mathf.InverseLerp(HUNGER_MODERATE, HUNGER_SEVERE, hunger) * SPEECH_CONTENTS_SHAKE_AMOUNT;
-        Vector3 contentPosition = speechContentsInitialPosition + new Vector3(contentShake * Random.Range(-1f, 1f), contentShake * Random.Range(-1f, 1f), 0);
-        speechContents.transform.localPosition = contentPosition;
+        Vector3 shakePosition = speechContentsInitialPosition + new Vector3(contentShake * Random.Range(-1f, 1f), contentShake * Random.Range(-1f, 1f), 0);
+        if (hunger < HUNGER_SEVERE) {
+            speechContents.transform.localPosition = shakePosition;
+            bubbleImage.transform.localPosition = Vector3.zero;
+        } else {
+            speechContents.transform.localPosition = shakePosition;
+            bubbleImage.transform.localPosition = shakePosition - speechContentsInitialPosition;
+        }
     }
 
     FruitScript GetNearbyFruit() {
