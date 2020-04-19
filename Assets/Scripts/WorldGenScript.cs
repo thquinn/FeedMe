@@ -127,6 +127,9 @@ public class WorldGenScript : MonoBehaviour
             bool[] flipOrder = new bool[] { false, true }.Shuffle();
             int[] rotationOrder = Enumerable.Range(0, 4).ToArray().Shuffle();
             foreach (bool flipped in flipOrder) {
+                if (flipped && !roomType.flippable) {
+                    continue;
+                }
                 foreach (int rotation in rotationOrder) {
                     // Given this configuration of this room type, do its entrances match up with the adjacent exits already present?
                     bool compatible = true;
@@ -212,6 +215,7 @@ class RoomInfo {
     public UnityEngine.Random.State randomState;
     public bool flipped; // across the X axis. performed before rotation.
     public int rotation; // [0, 3], number of 90 degree turns clockwise
+    public bool flippable;
 
     // Prototype constructor.
     public RoomInfo(int prefabIndex, string line) {
@@ -219,12 +223,14 @@ class RoomInfo {
         string[] tokens = line.Split(new char[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
         name = tokens[0];
         exits = tokens.Skip(1).Take(6).Select(token => token.ToExitType()).ToArray();
+        flippable = tokens[7] == "Y";
     }
     // Starting room constructor.
     public RoomInfo(RoomInfo other) {
         prefabIndex = other.prefabIndex;
         name = other.name;
         exits = (ExitType[])other.exits.Clone();
+        flippable = other.flippable;
         randomState = UnityEngine.Random.state;
     }
     // Room variant constructor.
@@ -239,6 +245,7 @@ class RoomInfo {
         randomState = UnityEngine.Random.state;
         this.flipped = flipped;
         this.rotation = rotation;
+        this.flippable = other.flippable;
     }
 
     public override string ToString() {
@@ -251,20 +258,24 @@ class RoomInfo {
 }
 
 public enum ExitType : int {
-    Undecided, None, Nothingness, Door
+    Undecided, None, Nothingness, Door, Wall, Outcropping
 }
 public static class ExitTypeExtensions {
     static bool[,] HORIZONTAL_COMPATIBILITY_MATRIX = new bool[,] {
-        { true,  true,  true,  true },
-        { true,  true,  true, false },
-        { true,  true,  true,  false },
-        { true,  false, false, true },
+        { true,  true,  true,  true,  true,  true },
+        { true,  true,  true,  false, false, false },
+        { true,  true,  true,  false, false, false },
+        { true,  false, false, true,  false, false },
+        { true,  false, false, false, true,  true  },
+        { true,  false, false, false, true,  false },
     };
     static bool[,] VERTICAL_COMPATIBILITY_MATRIX = new bool[,] {
-        { true,  true,  true,  true },
-        { true,  true,  false, false },
-        { true,  false, true,  false },
-        { true,  false, false, true },
+        { true,  true,  true,  true,  true,  true },
+        { true,  true,  false, false, false, false },
+        { true,  false, true,  false, false, false },
+        { true,  false, false, true,  false, false },
+        { true,  false, false, false, true,  false },
+        { true,  false, false, false, false, false },
     };
 
     public static ExitType ToExitType(this string c) {
@@ -272,6 +283,10 @@ public static class ExitTypeExtensions {
             return ExitType.Nothingness;
         } else if (c == "D") {
             return ExitType.Door;
+        } else if (c == "W") {
+            return ExitType.Wall;
+        } else if (c == "O") {
+            return ExitType.Outcropping;
         }
         return ExitType.None;
     }

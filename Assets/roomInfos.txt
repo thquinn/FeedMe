@@ -1,6 +1,9 @@
-name			N	E	S	W	U	D
-01_fourway		D	D	D	D	N	/
-02_tunnel		/	D	/	D	/	/
-03_peninsula	N	N	D	N	N	/
-04_clovercorner	N	N	D	D	N	/
-05_raisedtee	D	D	N	D	N	/
+name			N	E	S	W	U	D	flippable
+01_fourway		D	D	D	D	N	/	Y
+02_tunnel		/	D	/	D	/	/	Y
+03_peninsula	N	N	D	N	N	/	Y
+04_clovercorner	N	N	D	D	N	/	Y
+05_raisedtee	D	D	N	D	N	/	Y
+06_tripleblades	D	W	D	N	/	/	N
+07_threeway		D	W	D	D	N	/	Y
+08_wallclimbing	N	O	D	D	N	/	Y

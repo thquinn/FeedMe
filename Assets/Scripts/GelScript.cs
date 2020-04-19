@@ -54,6 +54,7 @@ public class GelScript : MonoBehaviour
     int whistleReadyTicks;
     FruitColor desiredFruit;
     float desireLeft;
+    bool firstDesireDone;
     int stareTimer;
 
     void Start() {
@@ -103,7 +104,8 @@ public class GelScript : MonoBehaviour
     }
     void UpdateDesire() {
         if (desiredFruit == FruitColor.None || desireLeft <= 0) {
-            desiredFruit = (FruitColor)Random.Range(1, System.Enum.GetNames(typeof(FruitColor)).Length);
+            desiredFruit = firstDesireDone ? (FruitColor)Random.Range(1, System.Enum.GetNames(typeof(FruitColor)).Length) : FruitColor.Red;
+            firstDesireDone = true;
             desireLeft = 1;
             fruitImage.color = desiredFruit.ToUnityColor();
         }
@@ -138,6 +140,7 @@ public class GelScript : MonoBehaviour
         float dot = Vector3.Dot(cam.transform.forward, (transform.position - cam.transform.position).normalized);
         stare &= dot > .75f;
         stare &= whistleReadyTicks == 0;
+        stare &= Time.timeScale > 0;
         if (stare) {
             stareTimer++;
         } else {

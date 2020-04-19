@@ -44,6 +44,9 @@ public class PlayerScript : MonoBehaviour
     }
     void LookControls(float x, float y) {
         transform.Rotate(0, x, 0);
+        if (grabbedBody != null) {
+            grabbedBody.transform.Rotate(0, x, 0, Space.World);
+        }
         float thetaX = neck.transform.localRotation.eulerAngles.x;
         if (thetaX > 180) {
             thetaX -= 360;

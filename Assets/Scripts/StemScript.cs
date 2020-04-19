@@ -5,7 +5,8 @@ using UnityEngine;
 public class StemScript : MonoBehaviour
 {
     static int BASE_TIMER = 30 * 60;
-    static int TIMER_INCREMENT = 15 * 60;
+    static int TIMER_INCREMENT = 30 * 60;
+    static int colorCycle;
 
     public GameObject fruitPrefab;
 
@@ -14,7 +15,7 @@ public class StemScript : MonoBehaviour
 
     FruitColor color;
     FruitScript fruit;
-    int numSpawned = 0;
+    int numSpawned = -1;
     int spawnTimer;
 
     void Start() {
@@ -25,7 +26,9 @@ public class StemScript : MonoBehaviour
         if (randomRotation) {
             transform.Rotate(Vector3.up, Random.Range(0, 360f), Space.Self);
         }
-        color = (FruitColor)Random.Range(1, System.Enum.GetNames(typeof(FruitColor)).Length);
+        int numColors = System.Enum.GetNames(typeof(FruitColor)).Length - 1;
+        color = (FruitColor)((colorCycle % numColors) + 1);
+        colorCycle++;
     }
     void Update()
     {
