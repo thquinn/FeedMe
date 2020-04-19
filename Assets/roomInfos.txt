@@ -3,3 +3,4 @@ name			N	E	S	W	U	D
 02_tunnel		/	D	/	D	/	/
 03_peninsula	N	N	D	N	N	/
 04_clovercorner	N	N	D	D	N	/
+05_raisedtee	D	D	N	D	N	/

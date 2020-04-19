@@ -21,6 +21,29 @@ namespace Assets.Scripts {
             return oldTheta;
         }
 
+        public static bool IsOnGround(GameObject go, int numChecks, float radius, float height) {
+            if (layerMaskTerrain == 0) {
+                layerMaskTerrain = LayerMask.GetMask("Terrain");
+            }
+            for (int i = -1; i < numChecks; i++) {
+                RaycastHit hitInfo;
+                if (i == -1) {
+                    Physics.Raycast(go.transform.position, Vector3.down, out hitInfo, height, layerMaskTerrain);
+                    //Debug.DrawLine(go.transform.position, go.transform.position + Vector3.down * height, Color.white, 10);
+                } else {
+                    float theta = 2 * Mathf.PI / numChecks * i;
+                    Vector3 position = go.transform.position;
+                    position.x += Mathf.Cos(theta) * radius;
+                    position.z += Mathf.Sin(theta) * radius;
+                    Physics.Raycast(position, Vector3.down, out hitInfo, height, layerMaskTerrain);
+                    //Debug.DrawLine(position, position + Vector3.down * height, Color.white, 10);
+                }
+                if (hitInfo.collider != null) {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static void UpdateShadow(GameObject go, SpriteRenderer shadowRenderer) {
             if (layerMaskTerrain == 0) {
                 layerMaskTerrain = LayerMask.GetMask("Terrain");

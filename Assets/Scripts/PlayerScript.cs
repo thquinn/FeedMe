@@ -1,35 +1,46 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
     static Vector3 FRICTION_VECTOR = new Vector3(.7f, 1, .7f);
-    static float JUMP_FORCE = 4.5f;
+    static float JUMP_FORCE = 5f;
     static Vector3 HOLD_POSITION = new Vector3(.2f, -.15f, .3f);
     static float THROW_FORCE = 80f;
+    static float WHISTLE_DISTANCE = 8;
+    static int WHISTLE_READY_NO_GO_COOLDOWN = 300;
+    static int WHISTLE_READY_GO_COOLDOWN = 150;
+    static int WHISTLE_GO_COOLDOWN = 20;
 
     private LayerMask layerMaskTerrain, layerMaskGrabbable;
 
     public GameObject neck;
-    public Rigidbody rb;    
+    public Rigidbody rb;
+    public GelScript gelScript;
     public DeathScript deathScript;
 
+    public AudioSource sfxWhistleReady, sfxWhistleGo, sfxWhistleDistant;
+
     Rigidbody grabbedBody;
-    int jumpCooldown;
+    int jumpCooldown, whistleReadyCooldown, whistleGoCooldown;
+    int holdDuration = 0;
 
     void Start()
     {
         Application.targetFrameRate = 60;
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         layerMaskTerrain = LayerMask.GetMask("Terrain");
         layerMaskGrabbable = LayerMask.GetMask("Grabbable");
     }
 
     void Update() {
         LookControls(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        MoveControls(Input.GetAxis("Forward"), Input.GetAxis("Right"));
+        MoveControls(Input.GetAxis("Vertical"), Input.GetAxis("Horizontal"));
         GrabControls();
+        WhistleControls();
     }
     void LookControls(float x, float y) {
         transform.Rotate(0, x, 0);
@@ -47,7 +58,7 @@ public class PlayerScript : MonoBehaviour
         rb.velocity = Vector3.Scale(rb.velocity, FRICTION_VECTOR);
         if (jumpCooldown > 0) {
             jumpCooldown--;
-        } else if (Input.GetButtonDown("Jump") && IsOnGround()) {
+        } else if (Input.GetButtonDown("Jump") && Util.IsOnGround(gameObject, 16, .4f, .55f)) {
             rb.velocity += Vector3.up * JUMP_FORCE;
             jumpCooldown = 4;
         }
@@ -61,13 +72,42 @@ public class PlayerScript : MonoBehaviour
             }
         }
         if (grabbedBody) {
+            holdDuration++;
             Vector3 neckPosition = neck.transform.localPosition;
             neck.transform.Translate(HOLD_POSITION, Space.Self);
             Vector3 holdPosition = neck.transform.position;
-            Debug.DrawLine(holdPosition, holdPosition + Vector3.up, Color.white, 1);
             neck.transform.localPosition = neckPosition;
-            grabbedBody.transform.position = Vector3.Lerp(grabbedBody.position, holdPosition, .33f);
+            float lerpFactor = Mathf.Min(.33f + .01f * holdDuration, .99f);
+            grabbedBody.transform.position = Vector3.Lerp(grabbedBody.position, holdPosition, lerpFactor);
             grabbedBody.detectCollisions = false;
+        } else {
+            holdDuration = 0;
+        }
+    }
+    void WhistleControls() {
+        if (sfxWhistleGo.isPlaying) {
+            sfxWhistleReady.volume -= .2f;
+        } else {
+            sfxWhistleReady.volume = 1f;
+        }
+        whistleReadyCooldown = Mathf.Max(0, whistleReadyCooldown - 1);
+        whistleGoCooldown = Mathf.Max(0, whistleGoCooldown - 1);
+        if (!Input.GetButtonDown("Whistle")) {
+            return;
+        }
+        float distanceToGel = (gelScript.transform.position - transform.position).magnitude;
+        if (distanceToGel > WHISTLE_DISTANCE && whistleReadyCooldown == 0) {
+            sfxWhistleDistant.Play();
+            whistleReadyCooldown = WHISTLE_READY_GO_COOLDOWN;
+        } else if (gelScript.IsWhistleReadied() && whistleGoCooldown == 0) {
+            sfxWhistleGo.Play();
+            gelScript.WhistleJump();
+            whistleReadyCooldown = WHISTLE_READY_GO_COOLDOWN;
+        } else if (whistleReadyCooldown == 0) {
+            sfxWhistleReady.Play();
+            gelScript.WhistleReady();
+            whistleReadyCooldown = WHISTLE_READY_NO_GO_COOLDOWN;
+            whistleGoCooldown = WHISTLE_GO_COOLDOWN;
         }
     }
 
@@ -77,13 +117,13 @@ public class PlayerScript : MonoBehaviour
         if (!hitInfo.collider) {
             return;
         }
-        FruitScript fruitScript = hitInfo.collider.GetComponent<FruitScript>();
-        fruitScript.Pick();
         grabbedBody = hitInfo.collider.GetComponent<Rigidbody>();
         grabbedBody.transform.parent = neck.transform;
         grabbedBody.isKinematic = true;
         grabbedBody.velocity = Vector3.zero;
         grabbedBody.angularVelocity = Vector3.zero;
+        FruitScript fruitScript = hitInfo.collider.GetComponent<FruitScript>();
+        fruitScript.Pick();
     }
     void Throw() {
         grabbedBody.isKinematic = false;
@@ -91,14 +131,6 @@ public class PlayerScript : MonoBehaviour
         grabbedBody.AddForce(neck.transform.forward * THROW_FORCE);
         grabbedBody.transform.parent = null;
         grabbedBody = null;
-    }
-
-    bool IsOnGround() {
-        // TODO: Cast multiple rays to allow jumping while leaning over an edge.
-        RaycastHit hitInfo;
-        Physics.Raycast(transform.position, Vector3.down, out hitInfo, .55f, layerMaskTerrain);
-        //Debug.DrawLine(transform.position, transform.position + Vector3.down * .55f, Color.white, 10);
-        return hitInfo.collider != null;
     }
 
     private void OnTriggerEnter(Collider other) {

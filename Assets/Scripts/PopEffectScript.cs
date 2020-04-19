@@ -27,7 +27,7 @@ public class PopEffectScript : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         frames++;
-        float t = EasingFunction.EaseOutQuad(0, 1, frames / 10f);
+        float t = EasingFunction.EaseOutQuad(0, 1, frames / 13f);
         if (t >= 1) {
             Destroy(gameObject);
             return;

@@ -62,9 +62,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popEffectPrefab: {fileID: 4164249276809200476, guid: a6a68b4d13e92c140a77e16a5d554817,
     type: 3}
+  colorMeshes:
+  - {fileID: -2432090755550338912, guid: b52fba8c17c818a46983f1625a911724, type: 3}
+  - {fileID: -2432090755550338912, guid: 6cfd2f9262d2c184293c5154838b1bb3, type: 3}
+  - {fileID: -2432090755550338912, guid: cae8c0d5ba2e4dd47be731686c6e92da, type: 3}
   rb: {fileID: 1618754438326439520}
+  meshFilter: {fileID: 1618754438421207861}
   shadowRenderer: {fileID: 1618754438974569542}
   meshObject: {fileID: 1618754438421207849}
+  color: 0
 --- !u!54 &1618754438326439520
 Rigidbody:
   m_ObjectHideFlags: 0
