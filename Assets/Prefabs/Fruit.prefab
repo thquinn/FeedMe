@@ -60,8 +60,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07957637b9fd1a54490be4828d793344, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  popEffectPrefab: {fileID: 4164249276809200476, guid: a6a68b4d13e92c140a77e16a5d554817,
+    type: 3}
   rb: {fileID: 1618754438326439520}
   shadowRenderer: {fileID: 1618754438974569542}
+  meshObject: {fileID: 1618754438421207849}
 --- !u!54 &1618754438326439520
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -70,13 +73,13 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1618754438326439525}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 0.2
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 32
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!1 &1618754438421207849
 GameObject:
