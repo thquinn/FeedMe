@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FruitScript : MonoBehaviour
 {
-    static float VIBRATION_INTENSITY = .03f;
+    static float VIBRATION_INTENSITY = .04f;
 
     public GameObject popEffectPrefab;
     public Mesh[] colorMeshes;
@@ -13,6 +13,7 @@ public class FruitScript : MonoBehaviour
     public Rigidbody rb;
     public MeshFilter meshFilter;
     public SpriteRenderer shadowRenderer;
+    public Light glowLight;
     public GameObject meshObject;
 
     public FruitColor color;
@@ -31,6 +32,7 @@ public class FruitScript : MonoBehaviour
         int colorIndex = (int)color;
         if (colorIndex > 1) {
             meshFilter.mesh = colorMeshes[colorIndex - 1];
+            glowLight.color = Color.Lerp(color.ToUnityColor(), Color.white, .5f);
         }
 
     }

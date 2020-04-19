@@ -5,8 +5,10 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
+    public static bool CAN_INPUT = false;
+
     static Vector3 FRICTION_VECTOR = new Vector3(.7f, 1, .7f);
-    static float JUMP_FORCE = 5f;
+    static float JUMP_FORCE = 4.75f;
     static Vector3 HOLD_POSITION = new Vector3(.2f, -.15f, .3f);
     static float THROW_FORCE = 80f;
     static float WHISTLE_DISTANCE = 8;
@@ -24,7 +26,7 @@ public class PlayerScript : MonoBehaviour
     public AudioSource sfxWhistleReady, sfxWhistleGo, sfxWhistleDistant;
 
     Rigidbody grabbedBody;
-    int jumpCooldown, whistleReadyCooldown, whistleGoCooldown;
+    int whistleReadyCooldown, whistleGoCooldown;
     int holdDuration = 0;
 
     void Start()
@@ -37,6 +39,9 @@ public class PlayerScript : MonoBehaviour
     }
 
     void Update() {
+        if (!CAN_INPUT) {
+            return;
+        }
         LookControls(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         MoveControls(Input.GetAxis("Vertical"), Input.GetAxis("Horizontal"));
         GrabControls();
@@ -59,11 +64,8 @@ public class PlayerScript : MonoBehaviour
         rb.velocity += transform.forward * forward * speed;
         rb.velocity += transform.right * right * speed;
         rb.velocity = Vector3.Scale(rb.velocity, FRICTION_VECTOR);
-        if (jumpCooldown > 0) {
-            jumpCooldown--;
-        } else if (Input.GetButtonDown("Jump") && Util.IsOnGround(gameObject, 16, .4f, .55f)) {
-            rb.velocity += Vector3.up * JUMP_FORCE;
-            jumpCooldown = 10;
+        if (Input.GetButtonDown("Jump") && Util.IsOnGround(gameObject, 16, .4f, .55f)) {
+            rb.velocity = Vector3.up * JUMP_FORCE;
         }
     }
     void GrabControls() {

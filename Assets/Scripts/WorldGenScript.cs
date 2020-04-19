@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class WorldGenScript : MonoBehaviour
 {
-    static float NOTHINGNESS_VACANCY_CHANCE = .9f;
+    //static float NOTHINGNESS_VACANCY_CHANCE = .9f;
 
     public GameObject[] roomPrefabs;
     public TextAsset roomInfosTextAsset;
@@ -31,7 +31,7 @@ public class WorldGenScript : MonoBehaviour
         roomInfos = new Dictionary<Tuple<int, int, int>, RoomInfo>();
         roomObjects = new Dictionary<Tuple<int, int, int>, GameObject>();
         Tuple<int, int, int> center = new Tuple<int, int, int>(0, 0, 0);
-        RoomInfo startRoom = new RoomInfo(roomTypes[0]);
+        RoomInfo startRoom = new RoomInfo(roomTypes[6]);
         InstantiateRoom(center, startRoom);
         lastPlayerCoor = new Tuple<int, int, int>(int.MinValue, int.MinValue, int.MinValue);
     }

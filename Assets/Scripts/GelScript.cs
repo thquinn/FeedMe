@@ -8,6 +8,7 @@ public class GelScript : MonoBehaviour
 {
     static Vector3 FRICTION_VECTOR = new Vector3(.88f, 1, .88f);
     static float PLAYER_CHASE_DISTANCE = 2;
+    static float PLAYER_CHASE_DISTANCE_MAX = 11;
     static float FOOD_CHASE_DISTANCE = 6;
     static float SQR_EATING_DISTANCE = .4f;
     static float HUNGER_MODERATE = 60;
@@ -15,6 +16,7 @@ public class GelScript : MonoBehaviour
     static float HUNGER_CRITICAL = 150;
     static float HUNGER_DEAD = 180;
     static float SATIATION_FRUIT = 30;
+    static float Y_COOR_DEAD = -4;
     static float EAT_RATE = .033f;
     static float HOP_HEIGHT = .33f;
     static float HOP_FORCE = 3f;
@@ -33,7 +35,7 @@ public class GelScript : MonoBehaviour
     static int STARE_TIME = 90;
     static float SPEECH_CONTENTS_SHAKE_AMOUNT = .033f;
 
-    private LayerMask layerMaskGrabbable;
+    private LayerMask layerMaskTerrain, layerMaskGrabbable;
     Camera cam;
     Vector3 speechContentsInitialPosition;
 
@@ -47,6 +49,8 @@ public class GelScript : MonoBehaviour
     public DeathScript deathScript;
     public AudioSource[] sfxSqueaks, sfxMunches;
     public AudioSource sfxBeg;
+    public MeshFilter meshFilter;
+    public Mesh deadMesh;
 
     bool isOnGround;
     float distanceToPlayer, sqrDistanceToFood;
@@ -62,6 +66,7 @@ public class GelScript : MonoBehaviour
     int stareTimer;
 
     void Start() {
+        layerMaskTerrain = LayerMask.GetMask("Terrain");
         layerMaskGrabbable = LayerMask.GetMask("Grabbable");
         cam = Camera.main;
         speechContentsInitialPosition = speechContents.transform.localPosition;
@@ -81,6 +86,10 @@ public class GelScript : MonoBehaviour
     void Update()
     {
         hunger += .0167f;
+        if (hunger > HUNGER_DEAD || transform.localPosition.y < Y_COOR_DEAD) {
+            Die();
+            return;
+        }
         if (hopCooldown > 0) {
             hopCooldown--;
         }
@@ -112,7 +121,10 @@ public class GelScript : MonoBehaviour
     }
     void UpdateDesire() {
         if (desiredFruit == FruitColor.None || desireLeft <= 0) {
-            desiredFruit = firstDesireDone ? (FruitColor)Random.Range(1, System.Enum.GetNames(typeof(FruitColor)).Length) : FruitColor.Red;
+            FruitColor lastDesiredFruit = desiredFruit;
+            while (desiredFruit == lastDesiredFruit) {
+                desiredFruit = firstDesireDone ? (FruitColor)Random.Range(1, System.Enum.GetNames(typeof(FruitColor)).Length) : FruitColor.Red;
+            }
             firstDesireDone = true;
             desireLeft = 1;
             fruitImage.color = desiredFruit.ToUnityColor();
@@ -121,26 +133,29 @@ public class GelScript : MonoBehaviour
     void Logic() {
         bool stare = false;
         FruitScript nearbyFruit = GetNearbyFruit();
-        if (nearbyFruit == null) {
+        if (nearbyFruit == null && CanSeePlayer()) {
             // Player chase logic.
             LookAtPlayer();
-            if (distanceToPlayer > PLAYER_CHASE_DISTANCE) {
+            if (distanceToPlayer > PLAYER_CHASE_DISTANCE && distanceToPlayer < PLAYER_CHASE_DISTANCE_MAX) {
                 Hop();
-            } else {
+            } else if (distanceToPlayer < PLAYER_CHASE_DISTANCE_MAX) {
                 stare = true;
             }
-        } else {
+        } else if (nearbyFruit != null) {
             // Food logic.
             LookAtFood(nearbyFruit.gameObject);
             if (sqrDistanceToFood > SQR_EATING_DISTANCE) {
                 Hop();
-            } else if (hopCooldown == 0) {
-                HappyHop();
-                bool done = nearbyFruit.Eat(EAT_RATE);
-                hunger = Mathf.Max(0, hunger - EAT_RATE * SATIATION_FRUIT);
-                desireLeft = done ? 0 : desireLeft - EAT_RATE;
-                if (done) {
-                    speedBoostFrames = SPEED_BOOST_DURATION;
+            } else {
+                TinyPush(nearbyFruit.gameObject);
+                if (hopCooldown == 0) {
+                    HappyHop();
+                    bool done = nearbyFruit.Eat(EAT_RATE);
+                    hunger = Mathf.Max(0, hunger - EAT_RATE * SATIATION_FRUIT);
+                    desireLeft = done ? 0 : desireLeft - EAT_RATE;
+                    if (done) {
+                        speedBoostFrames = SPEED_BOOST_DURATION;
+                    }
                 }
             }
         }
@@ -165,6 +180,7 @@ public class GelScript : MonoBehaviour
                 sfxBeg.pitch = 2.25f;
             }
             sfxBeg.Play();
+            PlayerScript.CAN_INPUT = true;
         } else if (stareTimer < STARE_TIME) {
             speechCanvasGroup.alpha -= .1f;
         }
@@ -224,6 +240,15 @@ public class GelScript : MonoBehaviour
         oldThetaX = Util.CorrectDegreeDiscrepancy(oldThetaX, thetaX);
         gimbal.transform.localRotation = Quaternion.Euler(Mathf.Lerp(oldThetaX, thetaX, .1f), 0, 0);
     }
+    void TinyPush(GameObject gameObject) {
+        float distance = (gameObject.transform.localPosition - transform.localPosition).sqrMagnitude;
+        float tooClose = SQR_EATING_DISTANCE * .5f - distance;
+        if (tooClose > 0) {
+            Vector3 objPos = gameObject.transform.localPosition;
+            objPos += transform.forward * tooClose * .1f;
+            gameObject.transform.localPosition = objPos;
+        }
+    }
 
     void SpeechEffects() {
         speechCanvas.transform.LookAt(cam.transform);
@@ -241,6 +266,20 @@ public class GelScript : MonoBehaviour
         }
     }
 
+    bool CanSeePlayer() {
+        for (float offset = -.25f; offset <= .25f;  offset += .05f) {
+            RaycastHit hitInfo;
+            Vector3 rayOrigin = transform.localPosition + transform.right * offset;
+            Vector3 rayDirection = player.transform.localPosition - transform.localPosition;
+            float distance = rayDirection.magnitude;
+            Physics.Raycast(rayOrigin, rayDirection, out hitInfo, distance, layerMaskTerrain);
+            Debug.DrawLine(rayOrigin, player.transform.localPosition, Color.white, .1f);
+            if (!hitInfo.collider) {
+                return true;
+            }
+        }
+        return false;
+    }
     FruitScript GetNearbyFruit() {
         FruitScript closest = null;
         float closestSqrDistance = float.MaxValue;
@@ -265,8 +304,12 @@ public class GelScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if (other.tag == "Death") {
-            deathScript.Die();
+            Die();
         }
+    }
+    void Die() {
+        meshFilter.mesh = deadMesh;
+        deathScript.Die();
     }
 
     public void WhistleReady() {
