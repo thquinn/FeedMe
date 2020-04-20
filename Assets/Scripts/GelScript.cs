@@ -27,6 +27,7 @@ public class GelScript : MonoBehaviour
     static float WHISTLE_HOP_FORCE = 3.75f;
     static float WHISTLE_HOP_HEIGHT = 1.65f;
     static int HOP_COOLDOWN = 15;
+    static int HOP_COOLDOWN_HUNGRY = 22;
     static int WHISTLE_HOP_COOLDOWN = 75;
     static int WHISTLE_READY_TICKS = 180;
     static int WHISTLE_HOP_PUSH_FRAMES = 60;
@@ -209,7 +210,9 @@ public class GelScript : MonoBehaviour
         forward.y += HOP_HEIGHT;
         forward *= HOP_FORCE;
         rb.AddForce(forward, ForceMode.Impulse);
-        hopCooldown = HOP_COOLDOWN;
+        float hopCooldownLerpFactor = Mathf.InverseLerp(HUNGER_MODERATE, HUNGER_CRITICAL, hunger);
+        int hopCooldownWithHunger = Mathf.RoundToInt(Mathf.Lerp(HOP_COOLDOWN, HOP_COOLDOWN_HUNGRY, hopCooldownLerpFactor));
+        hopCooldown = hopCooldownWithHunger;
         AudioSource sfxSqueak = sfxSqueaks[Random.Range(0, sfxSqueaks.Length)];
         sfxSqueak.pitch = 1.5f;
         sfxSqueak.PlayOneShot(sfxSqueak.clip, 0.2f);

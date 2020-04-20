@@ -4295,6 +4295,7 @@ MonoBehaviour:
   sfxWhistleGo: {fileID: 523857343}
   sfxWhistleDistant: {fileID: 523857345}
   sfxCrunch: {fileID: 523857346}
+  farWhistleFrames: 0
 --- !u!54 &3452538245869412441
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4548,7 +4549,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e2916a5f40cda44d95811b724904d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 3452538245869412446}
+  playerScript: {fileID: 3452538245869412440}
   gimbal: {fileID: 3070609704407974609}
   speechContents: {fileID: 1521700670}
   rb: {fileID: 6466344809103519421}

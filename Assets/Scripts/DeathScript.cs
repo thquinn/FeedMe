@@ -101,10 +101,11 @@ public class DeathScript : MonoBehaviour {
         return (int)reason >= 3;
     }
     static string[] TRY_AGAIN_STRINGS = new string[] {
-        "Press Enter to try again.",
+        "Press Enter to try, try again.",
         "Press Enter to give it another go.",
         "Press Enter to do better.",
         "Press Enter to make it right.",
+        "Press Enter to take another crack at it.",
     };
     void SetDeathText() {
         int totalSeconds = Mathf.FloorToInt(time);
@@ -114,7 +115,7 @@ public class DeathScript : MonoBehaviour {
                             seconds == 0 ? string.Format("{0} {1}", minutes, minutes == 1 ? "minute" : "minutes") :
                                            string.Format("{0} {1} and {2} {3}", minutes, minutes == 1 ? "minute" : "minutes", seconds, seconds == 1 ? "second" : "seconds" );
         if (IsGelReason()) {
-            timeString = string.Format("You kept him alive for {0}.", timeString);
+            timeString = string.Format("He lived for {0}.", timeString);
         } else {
             timeString = string.Format("You kept your new friend alive for {0}.", timeString);
         }
