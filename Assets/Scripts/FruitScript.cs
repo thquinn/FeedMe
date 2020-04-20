@@ -32,7 +32,7 @@ public class FruitScript : MonoBehaviour
         int colorIndex = (int)color;
         if (colorIndex > 1) {
             meshFilter.mesh = colorMeshes[colorIndex - 1];
-            glowLight.color = Color.Lerp(color.ToUnityColor(), Color.white, .5f);
+            glowLight.color = Color.Lerp(color.GetUnityColorTriplet()[0], Color.white, .5f);
         }
 
     }
@@ -63,6 +63,10 @@ public class FruitScript : MonoBehaviour
     }
     void Update()
     {
+        if (transform.localPosition.y < -100) {
+            Destroy(gameObject);
+            return;
+        }
         frames++;
         if (stemScript != null) {
             transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one / transform.parent.localScale.x, .1f);
@@ -80,8 +84,13 @@ public enum FruitColor : int {
 }
 
 public static class FruitExtensions {
-    static Color[] UNITY_COLORS = new Color[] { Color.black, Color.red, new Color(.5f, 0, .5f), new Color(0, .5f, 0) };
-    public static Color ToUnityColor(this FruitColor fruitColor) {
-        return UNITY_COLORS[(int)fruitColor];
+    static Color[][] UNITY_COLOR_TRIPLETS = new Color[][] {
+        new Color[]{ Color.black, Color.black, Color.black },
+        new Color[]{ new Color(0.6117647f, 0, 0), new Color(0.764706f, 0, 0), new Color(0.3019608f, 0, 0, .5f) } ,
+        new Color[]{ new Color(0.4588236f, 0, 0.4588236f), new Color(0.4588236f, 0, 0.6901961f), new Color(0.2313726f, 0, 0.2313726f, .5f) },
+        new Color[]{ new Color(0, 0.4588236f, 0), new Color(0.4588236f, 0.4588236f, 0), new Color(0, 0.2313726f, 0, .5f) },
+    };
+    public static Color[] GetUnityColorTriplet(this FruitColor fruitColor) {
+        return UNITY_COLOR_TRIPLETS[(int)fruitColor];
     }
 }

@@ -44,7 +44,7 @@ public class GelScript : MonoBehaviour
     public SpriteRenderer shadowRenderer;
     public Canvas speechCanvas;
     public CanvasGroup speechCanvasGroup;
-    public Image bubbleImage, fruitImage, exclamationImage;
+    public Image bubbleImage, fruitImage, fruitStripesImage, fruitShadowImage, exclamationImage;
     public Sprite bubbleNormal, bubbleCritical;
     public DeathScript deathScript;
     public AudioSource[] sfxSqueaks, sfxMunches;
@@ -130,7 +130,10 @@ public class GelScript : MonoBehaviour
             }
             firstDesireDone = true;
             desireLeft = 1;
-            fruitImage.color = desiredFruit.ToUnityColor();
+            Color[] colorTriplet = desiredFruit.GetUnityColorTriplet();
+            fruitImage.color = colorTriplet[0];
+            fruitStripesImage.color = colorTriplet[1];
+            fruitShadowImage.color = colorTriplet[2];
         }
     }
     void Logic() {
