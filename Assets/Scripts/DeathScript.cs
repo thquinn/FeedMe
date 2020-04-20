@@ -44,6 +44,9 @@ public class DeathScript : MonoBehaviour {
         cam.transform.localRotation = originalRot;
     }
 
+    void Start() {
+        fadeCanvasGroup.alpha = 1;
+    }
     void Update() {
         time += Time.deltaTime;
         if (deathTMP.color.a >= 1 && Input.GetButtonDown("Restart")) {
@@ -52,7 +55,7 @@ public class DeathScript : MonoBehaviour {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         if (reason != DeathReason.None) {
-            AudioListener.volume -= .005f;
+            AudioListener.volume -= .0025f;
             if (AudioListener.volume <= 0) {
                 musicScript.Stop();
             }

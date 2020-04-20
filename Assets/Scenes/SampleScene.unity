@@ -164,6 +164,10 @@ MonoBehaviour:
   - {fileID: 6800687563457184384, guid: 44a1fc52866ad934c96eaac1fe27decb, type: 3}
   - {fileID: 4563067942411682884, guid: c9ba3700f6f4c8a488081fb2e6a9c4f8, type: 3}
   - {fileID: 5168763652295102353, guid: 1aa4a711d5dfafe489d733ab4b901ae3, type: 3}
+  - {fileID: 3840059707249281562, guid: 8e9b8ef3d9506b9469ce268224b9d326, type: 3}
+  - {fileID: 4084720608162093567, guid: d387dff7624259b48b9d442803b5265d, type: 3}
+  - {fileID: 7358355094022544744, guid: 081892384b1966f49b6e307f28267e28, type: 3}
+  - {fileID: 5714276468439826949, guid: b8413d13192e7e745a3c9eb33a903943, type: 3}
   roomInfosTextAsset: {fileID: 4900000, guid: c68b85f60f7bf8e4ab142eef6affb1b1, type: 3}
   player: {fileID: 3452538245869412446}
 --- !u!4 &46299567
@@ -656,7 +660,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 6d3f1e4ebfe87a8438d2f558d6071685, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 0.75
+  m_Pitch: 0.65
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -924,7 +928,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 980335116}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -1108,7 +1112,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1046958879}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
