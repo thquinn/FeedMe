@@ -24,7 +24,7 @@ public class PlayerScript : MonoBehaviour
     public GelScript gelScript;
     public DeathScript deathScript;
 
-    public AudioSource sfxWhistleReady, sfxWhistleGo, sfxWhistleDistant;
+    public AudioSource sfxWhistleReady, sfxWhistleGo, sfxWhistleDistant, sfxCrunch;
 
     Rigidbody grabbedBody;
     int whistleReadyCooldown, whistleGoCooldown;
@@ -40,6 +40,9 @@ public class PlayerScript : MonoBehaviour
     }
 
     void Update() {
+        if (Input.GetKey(KeyCode.Escape)) {
+            Application.Quit();
+        }
         if (!CAN_INPUT) {
             return;
         }
@@ -144,6 +147,7 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if (other.tag == "Death") {
+            sfxCrunch.Play();
             deathScript.PlayerDie(DeathReason.PlayerHazard);
         }
     }

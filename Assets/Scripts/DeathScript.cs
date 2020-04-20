@@ -9,7 +9,9 @@ public class DeathScript : MonoBehaviour {
     public CanvasGroup fadeCanvasGroup;
     public TextMeshProUGUI deathTMP;
     public GameObject gel, neck;
+    public MusicScript musicScript;
 
+    float time;
     DeathReason reason;
     int frames;
     Camera cam;
@@ -43,11 +45,17 @@ public class DeathScript : MonoBehaviour {
     }
 
     void Update() {
-        if (deathTMP.color.a == 1 && Input.GetButtonDown("Restart")) {
-            PlayerScript.CAN_INPUT = false;
+        time += Time.deltaTime;
+        if (deathTMP.color.a >= 1 && Input.GetButtonDown("Restart")) {
+            Time.timeScale = 1;
+            AudioListener.volume = 1;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         if (reason != DeathReason.None) {
+            AudioListener.volume -= .005f;
+            if (AudioListener.volume <= 0) {
+                musicScript.Stop();
+            }
             frames++;
         }
 
@@ -64,10 +72,10 @@ public class DeathScript : MonoBehaviour {
             t = EasingFunction.EaseInOutQuad(0, 1, t);
             cam.transform.localPosition = Vector3.Lerp(originalPos, targetPos, t);
             cam.transform.localRotation = Quaternion.Lerp(originalRot, targetRot, t);
-            if (frames > 120) {
+            if (frames > 180) {
                 fadeCanvasGroup.alpha += .01f;
             }
-            if (frames == 240) {
+            if (frames == 300) {
                 deathTMP.color = Color.white;
             }
         } else if (reason == DeathReason.PlayerFall) {
@@ -96,7 +104,17 @@ public class DeathScript : MonoBehaviour {
         "Press ENTER to make it right.",
     };
     void SetDeathText() {
-        deathTMP.text = string.Format("{0}\n{1}", DeathReasonHelper.ReasonString(reason), TRY_AGAIN_STRINGS[Random.Range(0, TRY_AGAIN_STRINGS.Length)]);
+        int totalSeconds = Mathf.FloorToInt(time);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        string timeString = minutes == 0 ? string.Format("{0} {1}", seconds, seconds == 1 ? "second" : "seconds") :
+                                           string.Format("{0} {1} and {2} {3}", minutes, minutes == 1 ? "minute" : "minutes", seconds, seconds == 1 ? "second" : "seconds" );
+        if (IsGelReason()) {
+            timeString = string.Format("You kept him alive for {0}.", timeString);
+        } else {
+            timeString = string.Format("You kept your new friend alive for {0}.", timeString);
+        }
+        deathTMP.text = string.Format("{0}\n{1}\n{2}", DeathReasonHelper.ReasonString(reason), timeString, TRY_AGAIN_STRINGS[Random.Range(0, TRY_AGAIN_STRINGS.Length)]);
     }
 }
 
