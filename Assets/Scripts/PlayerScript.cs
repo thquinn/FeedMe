@@ -15,6 +15,7 @@ public class PlayerScript : MonoBehaviour
     static int WHISTLE_READY_NO_GO_COOLDOWN = 300;
     static int WHISTLE_READY_GO_COOLDOWN = 150;
     static int WHISTLE_GO_COOLDOWN = 20;
+    static int WHISTLE_FAR_EFFECT_FRAMES = 300;
     static float Y_COOR_DEAD = -4;
 
     private LayerMask layerMaskTerrain, layerMaskGrabbable;
@@ -29,6 +30,7 @@ public class PlayerScript : MonoBehaviour
     Rigidbody grabbedBody;
     int whistleReadyCooldown, whistleGoCooldown;
     int holdDuration = 0;
+    public int farWhistleFrames = 0;
 
     void Start()
     {
@@ -104,12 +106,14 @@ public class PlayerScript : MonoBehaviour
         }
         whistleReadyCooldown = Mathf.Max(0, whistleReadyCooldown - 1);
         whistleGoCooldown = Mathf.Max(0, whistleGoCooldown - 1);
+        farWhistleFrames = Mathf.Max(0, farWhistleFrames - 1);
         if (!Input.GetButtonDown("Whistle")) {
             return;
         }
         float distanceToGel = (gelScript.transform.position - transform.position).magnitude;
         if (distanceToGel > WHISTLE_DISTANCE && whistleReadyCooldown == 0) {
             sfxWhistleDistant.Play();
+            farWhistleFrames = WHISTLE_FAR_EFFECT_FRAMES;
             whistleReadyCooldown = WHISTLE_READY_GO_COOLDOWN;
         } else if (gelScript.IsWhistleReadied() && whistleGoCooldown == 0) {
             sfxWhistleGo.Play();

@@ -9,6 +9,7 @@ public class GelScript : MonoBehaviour
     static Vector3 FRICTION_VECTOR = new Vector3(.88f, 1, .88f);
     static float PLAYER_CHASE_DISTANCE = 2;
     static float PLAYER_CHASE_DISTANCE_MAX = 11;
+    static float PLAYER_CHASE_DISTANCE_MAX_FARWHISTLE = 16;
     static float FOOD_CHASE_DISTANCE = 6;
     static float SQR_EATING_DISTANCE = .4f;
     static float HUNGER_MODERATE = 60;
@@ -39,7 +40,8 @@ public class GelScript : MonoBehaviour
     Camera cam;
     Vector3 speechContentsInitialPosition;
 
-    public GameObject player, gimbal, speechContents;
+    public PlayerScript playerScript;
+    public GameObject gimbal, speechContents;
     public Rigidbody rb;
     public SpriteRenderer shadowRenderer;
     public Canvas speechCanvas;
@@ -119,7 +121,7 @@ public class GelScript : MonoBehaviour
     }
     void UpdateCachedState() {
         isOnGround = Util.IsOnGround(gameObject, 16, .2f, .2f);
-        Vector3 deltaPos = player.transform.localPosition - transform.localPosition;
+        Vector3 deltaPos = playerScript.transform.localPosition - transform.localPosition;
         distanceToPlayer = Mathf.Sqrt(deltaPos.x * deltaPos.x + deltaPos.z * deltaPos.z);
     }
     void UpdateDesire() {
@@ -142,9 +144,10 @@ public class GelScript : MonoBehaviour
         if (nearbyFruit == null && CanSeePlayer()) {
             // Player chase logic.
             LookAtPlayer();
-            if (distanceToPlayer > PLAYER_CHASE_DISTANCE && distanceToPlayer < PLAYER_CHASE_DISTANCE_MAX) {
+            float maxChaseDistance = playerScript.farWhistleFrames == 0 ? PLAYER_CHASE_DISTANCE_MAX : PLAYER_CHASE_DISTANCE_MAX_FARWHISTLE;
+            if (distanceToPlayer > PLAYER_CHASE_DISTANCE && distanceToPlayer < maxChaseDistance) {
                 Hop();
-            } else if (distanceToPlayer < PLAYER_CHASE_DISTANCE_MAX) {
+            } else if (distanceToPlayer < PLAYER_CHASE_DISTANCE) {
                 stare = true;
             }
         } else if (nearbyFruit != null) {
@@ -223,9 +226,9 @@ public class GelScript : MonoBehaviour
     }
     void LookAtPlayer() {
         // Y rotation.
-        TurnToFace(player);
+        TurnToFace(playerScript.gameObject);
         // X rotation.
-        float heightDifference = player.transform.localPosition.y - transform.localPosition.y + .33f;
+        float heightDifference = playerScript.transform.localPosition.y - transform.localPosition.y + .33f;
         bool lookUp = hopCooldown == 0 && distanceToPlayer <= PLAYER_CHASE_DISTANCE;
         float newThetaX = lookUp ? -Mathf.Atan2(heightDifference, distanceToPlayer) * Mathf.Rad2Deg : 0;
         XTilt(newThetaX);
@@ -277,10 +280,10 @@ public class GelScript : MonoBehaviour
         for (float offset = -.25f; offset <= .25f;  offset += .05f) {
             RaycastHit hitInfo;
             Vector3 rayOrigin = transform.localPosition + transform.right * offset;
-            Vector3 rayDirection = player.transform.localPosition - transform.localPosition;
+            Vector3 rayDirection = playerScript.transform.localPosition - transform.localPosition;
             float distance = rayDirection.magnitude;
             Physics.Raycast(rayOrigin, rayDirection, out hitInfo, distance, layerMaskTerrain);
-            Debug.DrawLine(rayOrigin, player.transform.localPosition, Color.white, .1f);
+            Debug.DrawLine(rayOrigin, playerScript.transform.localPosition, Color.white, .1f);
             if (!hitInfo.collider) {
                 return true;
             }
