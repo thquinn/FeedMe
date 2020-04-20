@@ -129,10 +129,10 @@ public static class DeathReasonHelper {
     static string[] REASON_STRINGS = new string[] {
         "I'm... not quite sure how you died.",
         "You fell to your death.",
-        "You walked into something dangerous.",
+        "You walked into danger.",
         "You let your new friend fall into a pit.",
         "You let your new friend starve.",
-        "You led your new friend into something dangerous.",
+        "You led your new friend into danger.",
     };
     public static string ReasonString(DeathReason reason) {
         return REASON_STRINGS[(int)reason];

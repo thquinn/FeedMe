@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class WorldGenScript : MonoBehaviour
 {
-    //static float NOTHINGNESS_VACANCY_CHANCE = .9f;
+    static float NOTHINGNESS_VACANCY_CHANCE = .5f;
 
     public GameObject[] roomPrefabs;
     public TextAsset roomInfosTextAsset;
@@ -118,17 +118,30 @@ public class WorldGenScript : MonoBehaviour
         ExitType[] adjacentExits = new ExitType[6];
         for (int direction = 0; direction < 6; direction++) {
             Tuple<int, int, int> neighborCoor = GetNeighborCoor(coor, direction);
-            if (RoomIsAbsent(neighborCoor)) {
-                continue;
+            if (!roomInfos.ContainsKey(neighborCoor)) {
+                adjacentExits[direction] = ExitType.Undecided;
+            } else if (roomInfos[neighborCoor] == null) {
+                adjacentExits[direction] = ExitType.Nothingness;
+            } else {
+                adjacentExits[direction] = roomInfos[neighborCoor].exits[ReverseDirection(direction)];
             }
-            adjacentExits[direction] = roomInfos[neighborCoor].exits[ReverseDirection(direction)];
         }
-        /*
-        if (adjacentExits.All(exit => exit == ExitType.Nothingness || exit == ExitType.Undecided) && UnityEngine.Random.value < NOTHINGNESS_VACANCY_CHANCE) {
-            // We're only connected to nothingness, so we should usually spawn nothing.
-            return null;
+        if (UnityEngine.Random.value < NOTHINGNESS_VACANCY_CHANCE) {
+            // We're only connected to nothingness, so we should sometimes spawn nothing.
+            bool foundNothingness = false;
+            bool eligibleForNull = true;
+            foreach (ExitType exit in adjacentExits) {
+                if (exit == ExitType.Nothingness) {
+                    foundNothingness = true;
+                } else if (exit != ExitType.Undecided) {
+                    eligibleForNull = false;
+                    break;
+                }
+            }
+            if (foundNothingness && eligibleForNull) {
+                return null;
+            }
         }
-        */
 
         int[] roomTypeOrder = Enumerable.Range(0, roomTypes.Count).ToArray().Shuffle();
         foreach (RoomInfo roomType in roomTypeOrder.Select(i => roomTypes[i])) {
