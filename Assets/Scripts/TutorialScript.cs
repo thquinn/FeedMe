@@ -11,22 +11,34 @@ public class TutorialScript : MonoBehaviour
 
     void Start() {
         if (Camera.main.aspect < 16 / 9f) {
+            float xRes = 600 * Camera.main.aspect;
+            float missingX = 1067 - xRes;
             Vector3 localPosition = transform.localPosition;
-            localPosition.x *= Camera.main.aspect / (16 / 9f);
+            localPosition.x += missingX / 2;
             transform.localPosition = localPosition;
+        }
+        if (!PlayerScript.CAN_INPUT) {
+            AdjustAlpha(-1);
         }
     }
     void Update()
     {
         frames++;
-        if (frames > 1200) {
-            Color c = image.color;
-            c.a -= .005f;
-            if (c.a <= 0) {
+        if (frames > 1500) {
+            AdjustAlpha(-.005f);
+            if (image.color.a <= 0) {
                 Destroy(gameObject);
                 return;
             }
-            image.color = c;
+        } else if (frames > 360) {
+            AdjustAlpha(.05f);
         }
     }
+
+    void AdjustAlpha(float f) {
+        Color c = image.color;
+        c.a = Mathf.Clamp01(c.a + f);
+        image.color = c;
+    }
 }
+;

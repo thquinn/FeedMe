@@ -9,7 +9,7 @@ public class GelScript : MonoBehaviour
     static Vector3 FRICTION_VECTOR = new Vector3(.88f, 1, .88f);
     static float PLAYER_CHASE_DISTANCE = 2;
     static float PLAYER_CHASE_DISTANCE_MAX = 11;
-    static float PLAYER_CHASE_DISTANCE_MAX_FARWHISTLE = 16;
+    static float PLAYER_CHASE_DISTANCE_MAX_FARWHISTLE = 18;
     static float FOOD_CHASE_DISTANCE = 6;
     static float SQR_EATING_DISTANCE = .4f;
     static float HUNGER_MODERATE = 60;

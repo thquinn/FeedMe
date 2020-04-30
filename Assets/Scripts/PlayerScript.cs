@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerScript : MonoBehaviour
-{
+public class PlayerScript : MonoBehaviour {
     public static bool CAN_INPUT = false;
 
     static Vector3 FRICTION_VECTOR = new Vector3(.7f, 1, .7f);
@@ -32,8 +31,7 @@ public class PlayerScript : MonoBehaviour
     int holdDuration = 0;
     public int farWhistleFrames = 0;
 
-    void Start()
-    {
+    void Start() {
         Application.targetFrameRate = 60;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -42,8 +40,11 @@ public class PlayerScript : MonoBehaviour
     }
 
     void Update() {
-        if (Input.GetKey(KeyCode.Escape)) {
+        if (Input.GetKeyDown(KeyCode.Escape) && Application.platform != RuntimePlatform.WebGLPlayer) {
             Application.Quit();
+        }
+        if (Input.GetKeyDown(KeyCode.F11) || ((Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && Input.GetKeyDown(KeyCode.Return))) {
+            Screen.fullScreen = !Screen.fullScreen;
         }
         if (!CAN_INPUT) {
             return;
@@ -57,6 +58,9 @@ public class PlayerScript : MonoBehaviour
         WhistleControls();
     }
     void LookControls(float x, float y) {
+        float mouseSensitivity = Application.platform == RuntimePlatform.WebGLPlayer ? .25f : 1;
+        x *= mouseSensitivity;
+        y *= mouseSensitivity;
         transform.Rotate(0, x, 0);
         if (grabbedBody != null) {
             grabbedBody.transform.Rotate(0, x, 0, Space.World);
